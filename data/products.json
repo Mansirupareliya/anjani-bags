@@ -1,0 +1,67 @@
+[
+  {
+    "id": "d4d263bfe9b1",
+    "name": "Non woven bag relance green color",
+    "category": "Gold Bags",
+    "description": "Non-Woven Bag  \r\nPremium 150 GSM Reliance Green non-woven bags, durable, reusable, and customizable for your brand.\r\nStylish custom jewellery bags with your choice of color, size, and design. Perfect for jewellery shops and packaging.",
+    "gsm": "150",
+    "size": "16*12*4",
+    "mrp": 45,
+    "price": 32,
+    "unit": "piece",
+    "featured": false,
+    "photos": [
+      "/uploads/1792329111843-f0c7b315b8.jpeg"
+    ],
+    "createdAt": 1792329112219,
+    "updatedAt": 1792332127550
+  },
+  {
+    "id": "e6a593b7d641",
+    "name": "Non-woven bags",
+    "category": "Gold Bags",
+    "description": "Non-Woven Bag\r\nPremium 150 GSM Reliance Green non-woven bags, durable, reusable, and customizable for your brand.\r\nStylish custom jewellery bags with your choice of color, size, and design. Perfect for jewellery shops and packaging.",
+    "gsm": "150",
+    "size": "16*12*4",
+    "mrp": 45,
+    "price": 30.99,
+    "unit": "piece",
+    "featured": false,
+    "photos": [
+      "/uploads/1792332033276-7f492899fb.jpeg"
+    ],
+    "createdAt": 1792332033793
+  },
+  {
+    "id": "66c0b0935730",
+    "name": "Non-woven bags",
+    "category": "Gold Bags",
+    "description": "Non-Woven Bag\r\nPremium 150 GSM Reliance Green non-woven bags, durable, reusable, and customizable for your brand.\r\nStylish custom jewellery bags with your choice of color, size, and design. Perfect for jewellery shops and packaging.",
+    "gsm": "150",
+    "size": "16*12*4",
+    "mrp": 42,
+    "price": 30.98,
+    "unit": "piece",
+    "featured": false,
+    "photos": [
+      "/uploads/1792332110696-2fdfdd5730.jpeg"
+    ],
+    "createdAt": 1792332110843
+  },
+  {
+    "id": "107aa2fe4f6d",
+    "name": "Non-woven bags",
+    "category": "Gold Bags",
+    "description": "Non-Woven Bag\r\nPremium 150 GSM Reliance Green non-woven bags, durable, reusable, and customizable for your brand.\r\nStylish custom jewellery bags with your choice of color, size, and design. Perfect for jewellery shops and packaging.",
+    "gsm": "150",
+    "size": "16*12*4",
+    "mrp": 45,
+    "price": 31,
+    "unit": "piece",
+    "featured": false,
+    "photos": [
+      "/uploads/1792332566982-20512b8a03.jpeg"
+    ],
+    "createdAt": 1792332567329
+  }
+]

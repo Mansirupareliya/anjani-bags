@@ -1,0 +1,162 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shree Anjani Bag | Non-Woven Bag Manufacturer</title>
+  <link rel="icon" href="/img/mace.png">
+  <meta name="description" content="Shree Anjani Bag - premium non-woven gold bags, grocery bags, business bags and jewellery bags.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- preloader -->
+  <div id="loader">
+    <img class="loader-mace" src="/img/mace.png" alt="">
+    <img class="loader-logo" src="/img/logo.png" alt="Shree Anjani Bag">
+  </div>
+
+  <!-- header -->
+  <header class="nav" id="nav">
+    <a href="#home" class="brand"><img src="/img/logo.png" alt="Shree Anjani Bag"></a>
+    <nav id="menu">
+      <a href="#home">Home</a>
+      <a href="#products">Products</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <button class="burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </header>
+
+  <!-- hero -->
+  <section class="hero" id="home">
+    <div class="sparkles" id="sparkles"></div>
+    <div class="hero-text">
+      <span class="eyebrow reveal">Since generations of trust</span>
+      <h1 class="reveal">Elegant <span class="shine">Non-Woven</span> Bags for Every Occasion</h1>
+      <p class="reveal">Gold bags, grocery bags, business bags and jewellery bags. Strong, reusable and printed with your brand.</p>
+      <div class="hero-btns reveal">
+        <a href="#products" class="btn btn-gold">Explore Collection</a>
+        <a href="#contact" class="btn btn-outline">Get a Quote</a>
+      </div>
+      <div class="stats reveal">
+        <div><b id="statDesigns" data-count="500">0</b>+<small>Designs</small></div>
+        <div><b id="statClients" data-count="1000">0</b>+<small>Happy Clients</small></div>
+        <div><b id="statYears" data-count="15">0</b>+<small>Years</small></div>
+      </div>
+    </div>
+    <div class="hero-art">
+      <div class="ring"></div>
+      <svg class="bag bag-1" viewBox="0 0 120 140"><path d="M38 38 C38 6 82 6 82 38" fill="none" stroke="#e8c874" stroke-width="7" stroke-linecap="round"/><path d="M14 36 H106 L100 132 H20 Z" fill="url(#g1)"/><path d="M14 36 H106 L104 48 H16Z" fill="#00000018"/><image href="/img/mace.png" x="38" y="62" width="44" height="44"/><defs><linearGradient id="g1" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#f6dc9a"/><stop offset=".5" stop-color="#d9a441"/><stop offset="1" stop-color="#a8761f"/></linearGradient></defs></svg>
+      <svg class="bag bag-2" viewBox="0 0 120 140"><rect x="16" y="30" width="88" height="104" rx="4" fill="#52120a"/><ellipse cx="60" cy="48" rx="16" ry="9" fill="#fbf6ec"/><path d="M30 80 H90 M30 92 H90" stroke="#f6a84a" stroke-width="2"/><text x="60" y="120" text-anchor="middle" font-family="Poppins" font-size="10" fill="#f6a84a">D-CUT</text></svg>
+      <svg class="bag bag-3" viewBox="0 0 120 140"><path d="M40 40 C40 14 80 14 80 40" fill="none" stroke="#2f6b4f" stroke-width="6"/><path d="M18 38 H102 V132 H18 Z" fill="#3f8a66"/><circle cx="60" cy="86" r="18" fill="none" stroke="#fbf6ec" stroke-width="3"/><path d="M52 86 l6 6 12-12" fill="none" stroke="#fbf6ec" stroke-width="3"/></svg>
+    </div>
+  </section>
+
+  <!-- marquee -->
+  <div class="marquee"><div class="track" id="marquee"></div></div>
+
+  <!-- products -->
+  <section class="section alt" id="products">
+    <form class="filter-bar reveal" id="filterBar" onsubmit="return false">
+      <label class="f-search">Search
+        <input id="search" type="search" placeholder="Search bags...">
+      </label>
+      <label>Category
+        <select id="fCat"><option value="">All Categories</option></select>
+      </label>
+      <label>GSM
+        <select id="fGsm"><option value="">All GSM</option></select>
+      </label>
+      <label>Price (₹)
+        <span class="f-range">
+          <input id="fMin" type="number" min="0" placeholder="Min">
+          <i>–</i>
+          <input id="fMax" type="number" min="0" placeholder="Max">
+        </span>
+      </label>
+      <label>Sort by
+        <select id="fSort">
+          <option value="new">Newest first</option>
+          <option value="low">Price: Low to High</option>
+          <option value="high">Price: High to Low</option>
+          <option value="gsm">GSM: Low to High</option>
+        </select>
+      </label>
+      <button type="button" class="f-reset" id="fReset">Clear all</button>
+    </form>
+    <!-- phone: one button per filter, each opens its own dropdown -->
+    <div class="m-filters" id="mFilters">
+      <div class="m-chips" id="mChips"></div>
+      <div class="m-drop" id="mDrop" hidden></div>
+    </div>
+    <p class="result-count" id="resultCount"></p>
+
+    <div class="grid" id="grid"></div>
+    <p class="empty" id="empty" hidden>No bags match these filters.</p>
+  </section>
+
+  <!-- about -->
+  <section class="section" id="about">
+    <div class="about">
+      <div class="about-text reveal">
+        <div class="ribbon"><span>About Us</span></div>
+        <p>At <b>Shree Anjani Bag</b>, we manufacture premium quality non-woven bags that combine strength, style and sustainability. From shining gold bags for weddings and jewellers to everyday grocery bags and printed business bags, every piece is crafted with care.</p>
+        <ul class="features">
+          <li><i>✦</i> Custom printing with your logo</li>
+          <li><i>✦</i> All GSM options (40 to 120 GSM)</li>
+          <li><i>✦</i> Bulk orders at factory prices</li>
+          <li><i>✦</i> Eco-friendly and reusable</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- contact -->
+  <section class="section alt" id="contact">
+    <div class="ribbon reveal"><span>Contact Us</span></div>
+    <p class="sub reveal">We would love to make bags for you</p>
+    <div class="contact-grid">
+      <a class="contact-card reveal" id="cPhone"><i>☎</i><b>Call Us</b><span></span></a>
+      <a class="contact-card reveal" id="cWa" target="_blank" rel="noopener"><i>✆</i><b>WhatsApp</b><span>Chat with us</span></a>
+      <a class="contact-card reveal" id="cMail"><i>✉</i><b>Email</b><span></span></a>
+      <div class="contact-card reveal" id="cAddr"><i>⌂</i><b>Visit Us</b><span></span></div>
+    </div>
+  </section>
+
+  <footer>
+    <img src="/img/logo.png" alt="Shree Anjani Bag">
+    <p>© <span id="year"></span> Shree Anjani Bag. All rights reserved.</p>
+  </footer>
+
+  <a class="wa-float" id="waFloat" target="_blank" rel="noopener" aria-label="WhatsApp">✆</a>
+
+  <!-- product modal -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-box">
+      <button class="close" id="closeModal" aria-label="Close">×</button>
+      <div class="gallery">
+        <div class="main-photo" id="mainPhoto">
+          <button class="nav-btn prev" id="prevPhoto">‹</button>
+          <img id="mainImg" alt="">
+          <button class="nav-btn next" id="nextPhoto">›</button>
+          <span class="counter" id="photoCount"></span>
+        </div>
+        <div class="thumbs" id="thumbs"></div>
+      </div>
+      <div class="details">
+        <span class="tag" id="mCat"></span>
+        <h2 id="mName"></h2>
+        <div class="price-row" id="mPrice"></div>
+        <div class="specs" id="mSpecs"></div>
+        <p id="mDesc"></p>
+        <a class="btn btn-gold btn-pop" id="mEnquire" target="_blank" rel="noopener">Enquire on WhatsApp</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

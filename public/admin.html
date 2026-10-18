@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin | Shree Anjani Bag</title>
+  <link rel="icon" href="/img/mace.png">
+  <meta name="robots" content="noindex">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+
+  <!-- login -->
+  <section id="login" class="login">
+    <form id="loginForm" class="login-box">
+      <img class="logo-img" src="/img/logo.png" alt="Shree Anjani Bag">
+      <p>Admin Login</p>
+      <input type="password" id="password" placeholder="Enter admin password" required autofocus>
+      <button class="btn">Login</button>
+      <small class="err" id="loginErr"></small>
+    </form>
+  </section>
+
+  <!-- dashboard -->
+  <section id="dash" hidden>
+    <header class="top">
+      <div class="brand"><img src="/img/logo.png" alt="Shree Anjani Bag"> <em>Admin</em></div>
+      <div class="top-actions">
+        <a href="/" target="_blank" class="link">View Website ↗</a>
+        <button class="link" id="logout">Logout</button>
+      </div>
+    </header>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="products">Bags</button>
+      <button class="tab" data-tab="settings">Settings</button>
+    </div>
+
+    <main class="wrap" id="tab-products">
+      <!-- form -->
+      <form id="bagForm" class="panel">
+        <h2 id="formTitle">Add New Bag</h2>
+        <div class="row">
+          <label>Bag Name *<input name="name" required placeholder="e.g. Golden D-Cut Wedding Bag"></label>
+          <label>Category<select name="category" id="catSelect"></select></label>
+        </div>
+        <label>Description<textarea name="description" rows="4" placeholder="Material, print, handle type, uses..."></textarea></label>
+        <div class="row three">
+          <label>GSM<input name="gsm" placeholder="e.g. 80"></label>
+          <label>Size<input name="size" placeholder="e.g. 12 x 16 inch"></label>
+          <label>Unit<input name="unit" value="piece" placeholder="piece / kg / 100 pcs"></label>
+        </div>
+        <div class="row">
+          <label>MRP (₹)<input name="mrp" type="number" step="0.01" min="0" placeholder="Original price"></label>
+          <label>Selling Price (₹)<input name="price" type="number" step="0.01" min="0" placeholder="Offer price"></label>
+        </div>
+        <label class="check"><input type="checkbox" name="featured"> Show as Bestseller</label>
+
+        <div class="drop" id="drop">
+          <input type="file" id="photos" accept="image/*" multiple>
+          <div><b>📷 Click or drag photos here</b><br><small>You can add many photos. The first photo is the cover.</small></div>
+        </div>
+        <div class="previews" id="previews"></div>
+
+        <div class="form-actions">
+          <button class="btn" id="saveBtn">Save Bag</button>
+          <button type="button" class="btn ghost" id="cancelEdit" hidden>Cancel</button>
+        </div>
+        <div class="progress" id="progress" hidden><span></span></div>
+      </form>
+
+      <!-- list -->
+      <div class="panel">
+        <div class="list-head">
+          <h2>All Bags <span id="count"></span></h2>
+          <input id="filter" placeholder="Search...">
+        </div>
+        <div id="list" class="list"></div>
+      </div>
+    </main>
+
+    <main class="wrap single" id="tab-settings" hidden>
+      <form id="setForm" class="panel">
+        <h2>Contact & Website Settings</h2>
+        <label>Phone<input name="phone"></label>
+        <label>WhatsApp Number (with country code, e.g. 919876543210)<input name="whatsapp"></label>
+        <label>Email<input name="email" type="email"></label>
+        <label>Address<input name="address"></label>
+        <h3 class="sub-head">Home Page Numbers</h3>
+        <div class="row three">
+          <label>Designs<input name="statDesigns" type="number" min="0"></label>
+          <label>Happy Clients<input name="statClients" type="number" min="0"></label>
+          <label>Years<input name="statYears" type="number" min="0"></label>
+        </div>
+        <label>Categories (one per line)<textarea name="categories" rows="5"></textarea></label>
+        <button class="btn">Save Settings</button>
+      </form>
+    </main>
+  </section>
+
+  <div class="toast" id="toast"></div>
+  <script src="/js/admin.js"></script>
+</body>
+</html>
