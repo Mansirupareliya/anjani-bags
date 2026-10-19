@@ -73,7 +73,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(store.UPLOAD_DIR, { maxAge: '7d' }));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 
-app.get('/api/config', (req, res) => res.json({ uploadMode: store.CLOUD ? 'blob' : 'local' }));
+app.get('/api/config', (req, res) => res.json({ uploadMode: store.CLOUD ? 'blob' : 'local', storage: store.status() }));
 
 app.post('/api/login', (req, res) => {
   const given = Buffer.from(String(req.body.password || ''));
@@ -112,6 +112,7 @@ app.post('/api/upload', requireAdmin, (req, res, next) => {
 app.post('/api/blob-upload', h(async (req, res) => {
   const { handleUpload } = require('@vercel/blob/client');
   const result = await handleUpload({
+    token: store.BLOB_TOKEN,
     request: req,
     body: req.body,
     onBeforeGenerateToken: async () => {
@@ -185,6 +186,6 @@ if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Anjani Bags running:  http://localhost:${PORT}`);
     console.log(`Admin panel:          http://localhost:${PORT}/admin`);
-    console.log(`Storage:              ${store.CLOUD ? 'Vercel Blob + Upstash Redis' : 'local files (data/, uploads/)'}`);
+    console.log(`Storage:              ${store.CLOUD ? 'Vercel Blob + Redis' : 'local files (data/, uploads/)'}`);
   });
 }
