@@ -115,53 +115,82 @@ function resetForm() {
 }
 $('#cancelEdit').onclick = resetForm;
 
-$('#bagForm').onsubmit = e => {
+// Photos are uploaded one by one first (to Vercel Blob on the live site, or to
+// this server locally), then the bag is saved with its photo URLs in display order.
+let uploadMode = null;
+const getUploadMode = async () =>
+  uploadMode ??= (await fetch('/api/config').then(r => r.json()).catch(() => ({}))).uploadMode || 'local';
+
+function uploadLocal(file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const fd = new FormData();
+    fd.append('photo', file);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/upload');
+    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+    xhr.upload.onprogress = ev => ev.lengthComputable && onProgress(ev.loaded);
+    xhr.onload = () => {
+      let data = {};
+      try { data = JSON.parse(xhr.responseText); } catch {}
+      if (xhr.status === 401) { logout(); return reject(new Error('Please log in again')); }
+      xhr.status < 300 ? resolve(data.url) : reject(new Error(data.error || 'Photo upload failed'));
+    };
+    xhr.onerror = () => reject(new Error('Network error'));
+    xhr.send(fd);
+  });
+}
+
+async function uploadBlob(file, onProgress) {
+  const { upload } = await import('/js/vendor/blob-client.js');
+  const safeName = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-');
+  const res = await upload('bags/' + safeName, file, {
+    access: 'public',
+    handleUploadUrl: '/api/blob-upload',
+    headers: { Authorization: 'Bearer ' + token },
+    onUploadProgress: p => onProgress(p.loaded)
+  });
+  return res.url;
+}
+
+$('#bagForm').onsubmit = async e => {
   e.preventDefault();
   const f = e.target;
-  const fd = new FormData();
-  ['name', 'category', 'description', 'gsm', 'size', 'unit', 'mrp', 'price'].forEach(k => fd.append(k, f[k].value));
-  fd.append('featured', f.featured.checked);
-
-  // Saved photos keep their place; new files are appended by the server, so
-  // upload in display order and then fix the order with a second call if needed.
-  const kept = photos.filter(p => !p.file).map(p => p.url);
-  fd.append('keepPhotos', JSON.stringify(kept));
-  photos.filter(p => p.file).forEach(p => fd.append('photos', p.file));
-
   const btn = $('#saveBtn'), bar = $('#progress');
   btn.disabled = true; bar.hidden = false;
-  const xhr = new XMLHttpRequest();
-  xhr.open(editingId ? 'PUT' : 'POST', editingId ? '/api/products/' + editingId : '/api/products');
-  xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-  xhr.upload.onprogress = ev => { if (ev.lengthComputable) bar.firstElementChild.style.width = (ev.loaded / ev.total * 100) + '%'; };
-  xhr.onload = async () => {
-    btn.disabled = false; bar.hidden = true; bar.firstElementChild.style.width = 0;
-    let data = {};
-    try { data = JSON.parse(xhr.responseText); } catch {}
-    if (xhr.status === 401) return logout();
-    if (xhr.status >= 300) return toast(data.error || 'Save failed');
-    await fixOrder(data);
+  const setBar = pct => bar.firstElementChild.style.width = pct + '%';
+  try {
+    // upload new photos, keeping the arranged order
+    const pending = photos.filter(p => p.file);
+    const total = pending.reduce((s, p) => s + p.file.size, 0) || 1;
+    const loaded = new Map();
+    const progress = (p, n) => { loaded.set(p, n); setBar([...loaded.values()].reduce((a, b) => a + b, 0) / total * 95); };
+    const send = (await getUploadMode()) === 'blob' ? uploadBlob : uploadLocal;
+    for (const p of pending) {
+      p.saved = p.saved || await send(p.file, n => progress(p, n));
+      progress(p, p.file.size);
+    }
+
+    const body = {
+      name: f.name.value, category: f.category.value, description: f.description.value,
+      gsm: f.gsm.value, size: f.size.value, unit: f.unit.value, mrp: f.mrp.value, price: f.price.value,
+      featured: f.featured.checked,
+      photos: photos.map(p => p.saved || p.url)
+    };
+    await api(editingId ? '/api/products/' + editingId : '/api/products', {
+      method: editingId ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    setBar(100);
     toast(editingId ? 'Bag updated ✓' : 'Bag added ✓');
     resetForm();
     loadAll();
-  };
-  xhr.onerror = () => { btn.disabled = false; bar.hidden = true; toast('Network error'); };
-  xhr.send(fd);
+  } catch (err) {
+    toast(err.message || 'Save failed');
+  } finally {
+    btn.disabled = false; bar.hidden = true; setBar(0);
+  }
 };
-
-// put photos back in the order the admin arranged them
-async function fixOrder(saved) {
-  const newUrls = saved.photos.slice(photos.filter(p => !p.file).length);
-  let n = 0;
-  const ordered = photos.map(p => p.file ? newUrls[n++] : p.url).filter(Boolean);
-  if (JSON.stringify(ordered) === JSON.stringify(saved.photos)) return;
-  const fd = new FormData();
-  const f = $('#bagForm');
-  ['name', 'category', 'description', 'gsm', 'size', 'unit', 'mrp', 'price'].forEach(k => fd.append(k, f[k].value));
-  fd.append('featured', f.featured.checked);
-  fd.append('keepPhotos', JSON.stringify(ordered));
-  await api('/api/products/' + saved.id, { method: 'PUT', body: fd }).catch(() => {});
-}
 
 // ---------- list ----------
 function renderList() {
