@@ -86,9 +86,11 @@ app.post('/api/login', (req, res) => {
 
 // --- photo uploads ---
 // Local: the photo is sent to this server and saved in uploads/.
+// destination is a function on purpose: given a string, multer creates the folder
+// at startup, which crashes on Vercel's read-only disk.
 const localUpload = multer({
   storage: multer.diskStorage({
-    destination: store.UPLOAD_DIR,
+    destination: (req, file, cb) => cb(null, store.UPLOAD_DIR),
     filename: (req, file, cb) => {
       const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
       cb(null, Date.now() + '-' + crypto.randomBytes(5).toString('hex') + ext);
