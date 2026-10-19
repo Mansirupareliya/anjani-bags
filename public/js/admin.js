@@ -115,20 +115,40 @@ function resetForm() {
 }
 $('#cancelEdit').onclick = resetForm;
 
-// Photos are uploaded one by one first (to Vercel Blob on the live site, or to
-// this server locally), then the bag is saved with its photo URLs in display order.
-let uploadMode = null;
-const getUploadMode = async () =>
-  uploadMode ??= (await fetch('/api/config').then(r => r.json()).catch(() => ({}))).uploadMode || 'local';
+// Photos are shrunk in the browser, uploaded one by one (to Vercel Blob on the live
+// site, or to uploads/ locally), then the bag is saved with its photo URLs in display order.
+const MAX_SIDE = 1600, MAX_BYTES = 4 * 1024 * 1024;
 
-function uploadLocal(file, onProgress) {
+async function shrinkImage(file) {
+  if (file.type === 'image/gif') return file; // keep animations as they are
+  let bmp;
+  try { bmp = await createImageBitmap(file); } catch { return file; }
+  const scale = Math.min(1, MAX_SIDE / Math.max(bmp.width, bmp.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(bmp.width * scale);
+  canvas.height = Math.round(bmp.height * scale);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff'; // transparent PNGs get a white background instead of black
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+  for (const quality of [0.85, 0.7, 0.55]) {
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', quality));
+    if (blob && blob.size <= MAX_BYTES) {
+      if (scale === 1 && blob.size >= file.size && file.size <= MAX_BYTES) return file;
+      return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
+    }
+  }
+  throw new Error(`${file.name} is too large`);
+}
+
+function uploadPhoto(file, onProgress) {
   return new Promise((resolve, reject) => {
     const fd = new FormData();
     fd.append('photo', file);
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/api/upload');
     xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-    xhr.upload.onprogress = ev => ev.lengthComputable && onProgress(ev.loaded);
+    xhr.upload.onprogress = ev => ev.lengthComputable && onProgress(ev.loaded / ev.total);
     xhr.onload = () => {
       let data = {};
       try { data = JSON.parse(xhr.responseText); } catch {}
@@ -140,18 +160,6 @@ function uploadLocal(file, onProgress) {
   });
 }
 
-async function uploadBlob(file, onProgress) {
-  const { upload } = await import('/js/vendor/blob-client.js');
-  const safeName = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-');
-  const res = await upload('bags/' + safeName, file, {
-    access: 'public',
-    handleUploadUrl: '/api/blob-upload',
-    headers: { Authorization: 'Bearer ' + token },
-    onUploadProgress: p => onProgress(p.loaded)
-  });
-  return res.url;
-}
-
 $('#bagForm').onsubmit = async e => {
   e.preventDefault();
   const f = e.target;
@@ -161,13 +169,8 @@ $('#bagForm').onsubmit = async e => {
   try {
     // upload new photos, keeping the arranged order
     const pending = photos.filter(p => p.file);
-    const total = pending.reduce((s, p) => s + p.file.size, 0) || 1;
-    const loaded = new Map();
-    const progress = (p, n) => { loaded.set(p, n); setBar([...loaded.values()].reduce((a, b) => a + b, 0) / total * 95); };
-    const send = (await getUploadMode()) === 'blob' ? uploadBlob : uploadLocal;
-    for (const p of pending) {
-      p.saved = p.saved || await send(p.file, n => progress(p, n));
-      progress(p, p.file.size);
+    for (const [i, p] of pending.entries()) {
+      p.saved = p.saved || await uploadPhoto(await shrinkImage(p.file), done => setBar((i + done) / pending.length * 95));
     }
 
     const body = {

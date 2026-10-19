@@ -11,7 +11,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'anjani@123';
 const SESSION_SECRET = process.env.SESSION_SECRET || ADMIN_PASSWORD;
 const SESSION_DAYS = 7;
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
-const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
+const MAX_PHOTO_BYTES = 4 * 1024 * 1024;
 
 const DEFAULT_SETTINGS = {
   phone: '+91 98765 43210',
@@ -73,7 +73,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(store.UPLOAD_DIR, { maxAge: '7d' }));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 
-app.get('/api/config', (req, res) => res.json({ uploadMode: store.CLOUD ? 'blob' : 'local', storage: store.status() }));
+app.get('/api/config', (req, res) => res.json({ storage: store.CLOUD ? 'cloud' : 'local', ...store.status() }));
 
 app.post('/api/login', (req, res) => {
   const given = Buffer.from(String(req.body.password || ''));
@@ -85,42 +85,22 @@ app.post('/api/login', (req, res) => {
 });
 
 // --- photo uploads ---
-// Local: the photo is sent to this server and saved in uploads/.
-// destination is a function on purpose: given a string, multer creates the folder
-// at startup, which crashes on Vercel's read-only disk.
-const localUpload = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => cb(null, store.UPLOAD_DIR),
-    filename: (req, file, cb) => {
-      const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
-      cb(null, Date.now() + '-' + crypto.randomBytes(5).toString('hex') + ext);
-    }
-  }),
+// The admin page shrinks each photo before sending it (Vercel accepts at most 4.5 MB
+// per request), then it is saved to uploads/ locally or to Vercel Blob online.
+const photoUpload = multer({
+  storage: multer.memoryStorage(),
   limits: { fileSize: MAX_PHOTO_BYTES },
   fileFilter: (req, file, cb) => cb(null, IMAGE_TYPES.includes(file.mimetype))
 });
-app.post('/api/upload', requireAdmin, (req, res, next) => {
-  if (store.CLOUD) return res.status(400).json({ error: 'Use cloud upload' });
-  localUpload.single('photo')(req, res, err => {
-    if (err) return next(err);
-    if (!req.file) return res.status(400).json({ error: 'Only image files are allowed' });
-    res.json({ url: '/uploads/' + req.file.filename });
-  });
-});
+app.post('/api/upload', requireAdmin, photoUpload.single('photo'), h(async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Only image files are allowed' });
+  res.json({ url: await store.savePhoto(req.file.buffer, req.file.originalname, req.file.mimetype) });
+}));
 
-// Vercel: the browser uploads straight to Vercel Blob; this only hands out a short-lived permission.
-app.post('/api/blob-upload', h(async (req, res) => {
-  const { handleUpload } = require('@vercel/blob/client');
-  const result = await handleUpload({
-    token: store.BLOB_TOKEN,
-    request: req,
-    body: req.body,
-    onBeforeGenerateToken: async () => {
-      if (!validToken(bearer(req))) throw new Error('Please log in again');
-      return { allowedContentTypes: IMAGE_TYPES, maximumSizeInBytes: MAX_PHOTO_BYTES, addRandomSuffix: true };
-    }
-  });
-  res.json(result);
+// photos from a private Blob store are shown through this route
+app.get('/api/photo/*', h(async (req, res) => {
+  if (!store.CLOUD) return res.status(404).end();
+  await store.servePhoto(req.params[0], req, res);
 }));
 
 // --- settings ---

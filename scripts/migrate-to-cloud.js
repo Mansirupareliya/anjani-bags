@@ -4,7 +4,6 @@
 //   node --env-file=.env.local scripts/migrate-to-cloud.js
 const fs = require('fs');
 const path = require('path');
-const { put } = require('@vercel/blob');
 const store = require('../storage');
 
 const ROOT = path.join(__dirname, '..');
@@ -30,8 +29,8 @@ const readLocal = name => {
     for (const local of p.photos) {
       const file = path.join(ROOT, 'uploads', path.basename(local));
       if (!fs.existsSync(file)) { console.warn('  missing photo, skipped:', local); continue; }
-      const blob = await put('bags/' + path.basename(file), fs.readFileSync(file), { access: 'public', addRandomSuffix: true, token: store.BLOB_TOKEN });
-      urls.push(blob.url);
+      const type = { '.png': 'image/png', '.webp': 'image/webp', '.gif': 'image/gif' }[path.extname(file).toLowerCase()] || 'image/jpeg';
+      urls.push(await store.savePhoto(fs.readFileSync(file), path.basename(file), type));
     }
     p.photos = urls;
     console.log(`✓ ${p.name} (${urls.length} photo(s))`);
